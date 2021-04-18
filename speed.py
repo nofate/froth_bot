@@ -62,9 +62,11 @@ class SpeedExtractor:
         #     if np.min([b, g, r]) < 160 and np.max([b, g, r]) > 30
         # ]
         self.clust_colors = clust_colors
+        self.directions = np.arange(0, 360, 45)
         self.direction_coords = np.asarray(
-            [[np.cos(d), np.sin(d)] for d in range(0, 360, 45)]
+            [[np.cos(d), np.sin(d)] for d in self.directions]
         )
+        
         self.point_knn = NearestNeighbors(n_neighbors=1)
         self.point_knn.fit(self.direction_coords)
 
@@ -114,7 +116,15 @@ class SpeedExtractor:
         speed = "-"
         direction = "-"
         if len(new_p) > 0:
-            shifts = np.sqrt(((new_p - old_p) ** 2).sum(1))
+            shift_coords = new_p - old_p
+            shifts = np.sqrt(((shift_coords) ** 2).sum(1))
+            vect = shift_coords.mean(0)
+            vect = vect/np.sqrt((vect**2).sum(0)+1e-5)
+            
+            vect_ids = self.point_knn.kneighbors(
+                [vect], return_distance=False
+            ).flatten()[0]
+            direction = "%d" % int(self.directions[vect_ids])
             speed = "%.3f" % shifts.mean()
         font = cv2.FONT_HERSHEY_SIMPLEX
         fontScale = 1
@@ -124,6 +134,15 @@ class SpeedExtractor:
             image_with_padding,
             "Speed:   %s" % speed,
             (0, 630),
+            font,
+            fontScale,
+            [255, 255, 255],
+            lineType,
+        )
+        image_with_text = cv2.putText(
+            image_with_padding,
+            "Angle:   %s" % direction,
+            (0, 670),
             font,
             fontScale,
             [255, 255, 255],
