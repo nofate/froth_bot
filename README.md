@@ -5,7 +5,7 @@ Please scroll the page down if you don't understand Russian and yet want to know
 В этом репозитории лежит код решения задачи с [хакатона Норникеля](nnhackathon.ru) (трек "Пенная вечеринка"), команда "Свидетели редких природных явлений".
 
 ## Вход
-56 коротких видео с металлургического производства, с этапа [флотации](https://ru.wikipedia.org/wiki/%D0%A4%D0%BB%D0%BE%D1%82%D0%B0%D1%86%D0%B8%D1%8F).
+56 коротких видео с металлургического производства, с этапа флотации [1].
 
 ## Выход
 
@@ -46,3 +46,8 @@ We've used bunch of classical CV methods: from constant thresholding to SIFT des
 To measure properties of bubbles in froth, we've used combination of constant thresholding and Sobel filter, after that we've implemented custom algorithm to find circumscribing ellipse for the bubble (if it is possible).
 
 ### 2) Dynamic
+To extract speed we've implemented simplified version of algorithm which was given at [2]. We've extracted SIFT keypoints and descriptors, after that we've matched keypoints at each pair of video frames and used this to compute keypoints "pseudo-speeds".
+
+# References
+[1]: https://ru.wikipedia.org/wiki/%D0%A4%D0%BB%D0%BE%D1%82%D0%B0%D1%86%D0%B8%D1%8F
+[2]: Jinping LIU, Weihua GUI, Zhaohui TANG: Flow velocity measurement and analysis based on froth image SIFT features and Kalman filter for froth flotation. Turk J Elec Eng & Comp Sci, (2013) 21: 2378 – 2396. doi:10.3906/elk-1204-91
