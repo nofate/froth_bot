@@ -24,11 +24,30 @@ class IterReaderIO(BufferedIOBase):
         return bytearray(it.islice(to_read, None, n))
 
 
-def emulate_stream(path, processor=None):
+def draw_flux(i):
+    old_points, new_points = all_point_pairs[i]
+    #plt.figure(figsize=(6, 8))
+    # frame0 = frames[i]
+    plt.clf()
+    frame = frames[i]
+    plt.imshow(frame, cmap="Greys", vmin=0, vmax=255)
+    for o, n in zip(old_points, new_points):
+        #print(o)
+        plt.plot([o[0], n[0]], [o[1], n[1]], color="red")
+        plt.plot([n[0], n[0]+1], [n[1], n[1]+1], color="blue")
+        #break
+    plt.title(f"Frame {i}")
+    plt.axis("off")
+
+
+def emulate_stream(path, output_path, processor=None):
     """reads the file if it were infinite"""
     cap = cv2.VideoCapture(path)
     if not cap.isOpened():
         raise StopIteration
+
+    out = cv2.VideoWriter(output_path, cv2.VideoWriter_fourcc(*'mp4v'), 5.0, (800, 600))
+
     while cap.isOpened():
         # Capture frame-by-frame
         ret, frame = cap.read()
@@ -40,8 +59,10 @@ def emulate_stream(path, processor=None):
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         if processor is not None:
             frame = processor(frame)
-        (flag, enc_frame) = cv2.imencode(".jpg", frame)
-        yield (b'--frame\r\n' b'Content-Type: image/jpeg\r\n\r\n' + 
-            bytearray(frame) + b'\r\n')
-        #yield bytes(frame)
+
+        out.write(frame)
+
+    cap.release()
+    out.release()
+
 

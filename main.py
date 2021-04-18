@@ -4,7 +4,7 @@ import ffmpeg
 from telegram.ext import Updater
 from telegram.ext import CommandHandler, CallbackQueryHandler
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
-from pathlib import Path
+import utils
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 
@@ -23,8 +23,17 @@ def start(update, context):
 
 
 def watch_froth(update, context):
-    f = open('/home/nofate/work/private/nnhack-21/bot/video/1.mp4', 'rb')
-
+    stream_name = update.callback_query.data
+    video_dir = 'video'
+    files = {
+        "stream1" : "video/F1_1_1_2.ts",
+        "stream2" : "video/F1_1_1_2.ts",
+        "stream3" : "video/F1_1_1_2.ts"
+    }
+    source_file = files[stream_name]
+    processor = None
+    utils.emulate_stream(f"{video_dir}/{source_file}.mp4", f"{video_dir}/{stream_name}.mp4", processor)
+    f = open(f"{video_dir}//{stream_name}.mp4", 'rb')
     context.bot.send_video(chat_id=update.effective_chat.id, supports_streaming=True, video=f)
 
 if __name__ == '__main__':
