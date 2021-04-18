@@ -339,8 +339,8 @@ class ImageProcessor:
 if __name__ == "__main__":
     from speed import SpeedExtractor
 
-    processor = ImageProcessor(processor=SpeedExtractor())
-    filename = "video/F1_1_1_1.ts"
+    processor = ImageProcessor()  #processor=SpeedExtractor())
+    filename = "video/F2_1_1_2.ts"
     from utils import emulate_stream
 
-    emulate_stream(filename, "bubbles.mp4", processor=processor, max_frames=30)
+    emulate_stream(filename, "bubbles_part1.mp4", processor=processor, max_frames=20)

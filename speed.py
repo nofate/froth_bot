@@ -177,4 +177,4 @@ if __name__ == "__main__":
     filename = "video/F1_1_1_1.ts"
     from utils import emulate_stream
 
-    emulate_stream(filename, "bubbles_.mp4", processor=processor, max_frames=5)
+    emulate_stream(filename, "bubbles_part2.mp4", processor=processor, max_frames=20)
