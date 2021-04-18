@@ -9,7 +9,7 @@ Please scroll the page down if you don't understand Russian and yet want to know
 
 ## Выход
 
-### Статика: пузыри и их характеристики
+### 1) Статика: пузыри и их характеристики
 
 С помощью бинаризации мы нашли блики, затем аппроксимировали пузыри эллипсами и придумали, как считать ряд величин, характеризующих состояние пузырьковой смеси в бочке в конкретный момент.
 
@@ -18,7 +18,7 @@ Please scroll the page down if you don't understand Russian and yet want to know
 ![static-features](https://github.com/nofate/froth_bot/blob/master/assets/bubbles1.gif)
 
 
-### Динамика: скорости пузырьков и направление потока
+### 2) Динамика: скорости пузырьков и направление потока
 
 Для решения этой части задачи мы использовали SIFT-дескрипторы и особые точки, затем сложным алгоритмом сматчили особые точки из разных фреймов видео между собой (сложность была в том, чтобы минимизировать число ложноположительных срабатываний алгоритма матчинга), получили сдвиги между парами точек и придумали, как с их помощью считать скорости пузырей в пене.
 Еще мы научились определять, в каком направлении движется поток пузырей.
@@ -36,12 +36,13 @@ Here you can find our team solution for [Nornickel's hackathon](nnhackathon.ru) 
 
 ## Input
 
-As an input we had 56 1-minute recordings with floth floatation. No annotation was provided.
+As an input we had 56 1-minute recordings with froth flotation. No annotation was provided.
 
 ## Output
 
-We used bunch of classical CV methods: from constant thresholding to SIFT descriptors, from `import cv2` to home-made algorithms to suppress false-positives.
+We've used bunch of classical CV methods: from constant thresholding to SIFT descriptors, from `import cv2` to home-made algorithms to suppress false-positives.
 
-### Static
+### 1) Static
+To measure properties of bubbles in froth, we've used combination of constant thresholding and Sobel filter, after that we've implemented custom algorithm to find circumscribing ellipse for the bubble (if it is possible).
 
-### Dynamic
+### 2) Dynamic
