@@ -26,15 +26,16 @@ def watch_froth(update, context):
     stream_name = update.callback_query.data
     video_dir = 'video'
     files = {
-        "stream1" : "video/F1_1_1_2.ts",
-        "stream2" : "video/F1_1_1_2.ts",
-        "stream3" : "video/F1_1_1_2.ts"
+        "stream1" : "F1_1_1_1.ts",
+        "stream2" : "F1_2_2_1.ts",
+        "stream3" : "F2_2_3_2.ts"
     }
     source_file = files[stream_name]
     processor = None
-    utils.emulate_stream(f"{video_dir}/{source_file}.mp4", f"{video_dir}/{stream_name}.mp4", processor)
-    f = open(f"{video_dir}//{stream_name}.mp4", 'rb')
+    utils.emulate_stream(f"{video_dir}/{source_file}", f"{video_dir}/{stream_name}.mp4", processor)
+    f = open(f"{video_dir}/{stream_name}.mp4", 'rb')
     context.bot.send_video(chat_id=update.effective_chat.id, supports_streaming=True, video=f)
+
 
 if __name__ == '__main__':
     updater = Updater(token='1618035678:AAGe4gJWjEp17QQ3_pNTcGBmJEpqszNeFng', use_context=True)
