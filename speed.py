@@ -139,15 +139,15 @@ class SpeedExtractor:
             [255, 255, 255],
             lineType,
         )
-        image_with_text = cv2.putText(
-            image_with_padding,
-            "Angle:   %s" % direction,
-            (0, 670),
-            font,
-            fontScale,
-            [255, 255, 255],
-            lineType,
-        )
+        # image_with_text = cv2.putText(
+        #     image_with_padding,
+        #     "Angle:   %s" % direction,
+        #     (0, 670),
+        #     font,
+        #     fontScale,
+        #     [255, 255, 255],
+        #     lineType,
+        # )
         return image_with_text
 
     def compute_features(self, image):
