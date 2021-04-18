@@ -11,7 +11,7 @@ class IterReaderIO(BufferedIOBase):
         self.iter = it.chain.from_iterable(iterable)
 
     def not_newline(self, s):
-        return s not in {'\n', '\r', '\r\n'}
+        return s not in {"\n", "\r", "\r\n"}
 
     def write(self, iterable):
         to_chain = it.chain.from_iterable(iterable)
@@ -27,16 +27,16 @@ class IterReaderIO(BufferedIOBase):
 
 def draw_flux(i):
     old_points, new_points = all_point_pairs[i]
-    #plt.figure(figsize=(6, 8))
+    # plt.figure(figsize=(6, 8))
     # frame0 = frames[i]
     plt.clf()
     frame = frames[i]
     plt.imshow(frame, cmap="Greys", vmin=0, vmax=255)
     for o, n in zip(old_points, new_points):
-        #print(o)
+        # print(o)
         plt.plot([o[0], n[0]], [o[1], n[1]], color="red")
-        plt.plot([n[0], n[0]+1], [n[1], n[1]+1], color="blue")
-        #break
+        plt.plot([n[0], n[0] + 1], [n[1], n[1] + 1], color="blue")
+        # break
     plt.title(f"Frame {i}")
     plt.axis("off")
 
@@ -48,12 +48,12 @@ def emulate_stream(path, output_path, processor=None, max_frames=-1, verbose=Fal
         raise StopIteration
 
     # out = cv2.VideoWriter(output_path, cv2.VideoWriter_fourcc(*'mp4v'), 5.0, (800, 600))
-    current_frame=0
+    current_frame = 0
     out = None
 
     while cap.isOpened():
         if verbose:
-            print("frame:",current_frame)
+            print("frame:", current_frame)
         # Capture frame-by-frame
         if max_frames > 0:
             if current_frame >= max_frames:
@@ -76,9 +76,9 @@ def emulate_stream(path, output_path, processor=None, max_frames=-1, verbose=Fal
         if out is None:
             h, w = frame.shape[:2]
             if os.path.splitext(output_path)[-1] == ".avi":
-                fourcc = cv2.VideoWriter_fourcc(*'XVID')
+                fourcc = cv2.VideoWriter_fourcc(*"XVID")
             else:
-                fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+                fourcc = cv2.VideoWriter_fourcc(*"mp4v")
             out = cv2.VideoWriter(output_path, fourcc, 5.0, (w, h))
 
         out.write(frame)
@@ -86,5 +86,3 @@ def emulate_stream(path, output_path, processor=None, max_frames=-1, verbose=Fal
     cap.release()
     if out is not None:
         out.release()
-
-
