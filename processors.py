@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 import math
+import webcolors
 
 
 def rotate_image(image, angle):
@@ -8,6 +9,28 @@ def rotate_image(image, angle):
   rot_mat = cv2.getRotationMatrix2D(image_center, angle, 1.0)
   result = cv2.warpAffine(image, rot_mat, image.shape[1::-1], flags=cv2.INTER_LINEAR)
   return result
+
+
+def rgb2hex(c):
+    return "#{:02x}{:02x}{:02x}".format(int(c[0]), int(c[1]), int(c[2]))  # format(int(c[0]), int(c[1]), int(c[2]))
+
+def hex2name(c):
+    h_color = '#{:02x}{:02x}{:02x}'.format(int(c[0]), int(c[1]), int(c[2]))
+    try:
+        nm = webcolors.hex_to_name(h_color, spec='css3')
+    except ValueError as v_error:
+        #print("{}".format(v_error))
+        rms_lst = []
+        for img_clr, img_hex in webcolors.CSS3_NAMES_TO_HEX.items():
+            cur_clr = webcolors.hex_to_rgb(img_hex)
+            rmse = np.sqrt(mean_squared_error(c, cur_clr))
+            rms_lst.append(rmse)
+
+        closest_color = rms_lst.index(min(rms_lst))
+
+        nm = list(webcolors.CSS3_NAMES_TO_HEX.items())[closest_color][0]
+    return nm
+
 
 
 def get_image_with_matches2(my_image, small_images):
@@ -53,17 +76,8 @@ def get_image_with_matches2(my_image, small_images):
 
             #new_gray = cv2.circle(new_gray, (int(centroids[i+1,0]), int(centroids[i+1,1])), int(max_size), (0,255,0), 5)
             if max_size > 10:
-                new_gray = cv2.ellipse(new_gray, 
-                    (
-                    int(centroids[i+1,0]),
-                    int(centroids[i+1,1])),
-                    (int(max_size), int(max_size2)),
-                    180+max_angle, 0, 360, (0,255,0), 2)
-                ellipses.append([
-                    int(centroids[i+1,0]),
-                    int(centroids[i+1,1]),
-                    int(max_size),
-                    int(max_size2), i])
+                new_gray = cv2.ellipse(new_gray, (int(centroids[i+1,0]), int(centroids[i+1,1])), (int(max_size), int(max_size2)), 180+max_angle, 0, 360, (0,255,0), 2)
+                ellipses.append([int(centroids[i+1,0]), int(centroids[i+1,1]), int(max_size), int(max_size2), i])
             #plt.imshow(grad_x)
             #plt.show()
             #print(size)
@@ -77,31 +91,36 @@ class FeaturesExtractor:
     def __init__(self):
         pass
 
-    def compute_features(self, frame_bgr):
-        image_gaussian = cv2.GaussianBlur(frame_bgr, (5, 5), 0)
+    def compute_features(self, image):
+        # image = cv2.imread("/home/jovyan/frames_F1_2_4_1/frame%d.jpg" % j)
+        image_gaussian = cv2.GaussianBlur(image, (5,5), 0)
         image_gray = cv2.cvtColor(image_gaussian, cv2.COLOR_BGR2GRAY)
         threshold, image_binary = cv2.threshold(image_gray, 160, 255, cv2.THRESH_BINARY)
-        #+cv2.THRESH_OTSU)
+        # +cv2.THRESH_OTSU)
         count, labels, stats, centroids = cv2.connectedComponentsWithStats(image_binary)
-        image_copy = frame_bgr.copy()
+        image_copy = image.copy()
         bound_size = 6
         small_images = []
-        for i in range(1, count):
+        for i in range(1,count):
             #print(stats[i])
             #image_copy = cv2.circle(image_copy, (int(centroids[i,0]), int(centroids[i,1])), 1, (0, 255, 0), 5)
             #image_copy = cv2.circle(image_copy, (int(centroids[i,0]), int(centroids[i,1])),  int(bound_size * abs(centroids[i, 1] - stats[i, 1])), (0, 255, 0), 5)
             max_bound = max(abs(centroids[i, 1] - stats[i, 1]), abs(centroids[i, 0] - stats[i, 0]))
             #image_copy = cv2.rectangle(image_copy, (stats[i, 0], stats[i, 1]),  (stats[i, 0] + stats[i, 2], stats[i, 1] + stats[i, 3]), (0, 255, 0), 5)
-            small_images.append(frame_bgr[max(0,int(centroids[i, 1] - bound_size * max_bound)) : 
+            small_images.append(image[max(0,int(centroids[i, 1] - bound_size * max_bound)) : 
                                            int(centroids[i, 1] + bound_size * max_bound), 
                                            max(0,int(centroids[i, 0] - bound_size*max_bound)) : 
                                            int(centroids[i, 0] + bound_size*max_bound)])
         # print(len(small_images))
-        image_with_matches, ellipses = get_image_with_matches2(frame_bgr, small_images)
+        image_with_matches, ellipses = get_image_with_matches2(image, small_images)
         ellipses_np = np.array(ellipses)
-        mean_diam = (np.mean(ellipses_np[:,2]) + np.mean(ellipses_np[:,3])) 
+        # print(ellipses_np)
+        if len(ellipses_np) == 0:
+            mean_diam = -1
+        else:
+            mean_diam = (np.mean(ellipses_np[:,2]) + np.mean(ellipses_np[:,3])) 
         font = cv2.FONT_HERSHEY_SIMPLEX
-        color = [0,0,0]
+        color = [0, 0, 0]
         index = 0
         for ellipse in ellipses:
             try:
@@ -109,27 +128,42 @@ class FeaturesExtractor:
                 index += 1
             except:
                 continue
-        color = color // index
+        color = np.asarray(color)
+        if index > 0:
+            color = color // index
+        # print(color)
         hex_col = rgb2hex(color)
         color_name = hex2name(color)
-        brightness = np.mean(np.take(stats, ellipses_np[:,4] + 1, 0)[:,3])/np.mean(ellipses_np[:,2])
-        near_exit = (ellipses_np[:,1] > 400).sum()/float(len(ellipses))
-        uniformness = min((ellipses_np[:,0] > 400).sum() / float((ellipses_np[:,0] <= 400).sum()),(ellipses_np[:,0] <= 400).sum() / float((ellipses_np[:,0] > 400).sum()))
-        mean_roundness = np.mean(ellipses_np[:,3]/ellipses_np[:,2])
-        large_frac = (ellipses_np[:, 2] > 20).sum()/float(len(ellipses_np))
+        if len(ellipses_np) > 0:
+            brightness = np.mean(np.take(stats, ellipses_np[:,4] + 1, 0)[:,3])/np.mean(ellipses_np[:,2])
+            near_exit = (ellipses_np[:,1] > 400).sum()/float(len(ellipses))
+            uniformness = min((ellipses_np[:,0] > 400).sum() / float((ellipses_np[:,0] <= 400).sum()),(ellipses_np[:,0] <= 400).sum() / float((ellipses_np[:,0] > 400).sum()))
+            mean_roundness = np.mean(ellipses_np[:,3]/ellipses_np[:,2])
+            large_frac = (ellipses_np[:,2] > 20).sum()/float(len(ellipses_np))
+            brightness = "%.3f" % brightness
+            near_exit = "%.3f" % near_exit
+            uniformness = "%.3f" % uniformness
+            mean_roundness = "%.3f" % mean_roundness
+            large_frac = "%.3f" % large_frac
+        else:
+            brightness = "-"
+            near_exit = "-"
+            uniformness = "-"
+            mean_roundness = "-"
+            large_frac = "-"
         fontScale = 1
         lineType = 2
-        image_with_padding = cv2.copyMakeBorder(image_with_matches, 0,180,0,0, cv2.BORDER_CONSTANT,value=[0,0,0])
+        image_with_padding = cv2.copyMakeBorder(image_with_matches,0,180,0,0,cv2.BORDER_CONSTANT,value=[0,0,0])
         image_with_text = cv2.putText(image_with_padding,'Froth number:   %d' % len(ellipses),  (0, 630), font, fontScale, [255,255,255], lineType)
         image_with_text = cv2.putText(image_with_text,'Mean froth diam: %d' % int(mean_diam),  (0, 670), font, fontScale, [255,255,255], lineType)
         image_with_text = cv2.putText(image_with_text,'Froth color: ' + str(color_name),  (0, 710), font, fontScale, [255,255,255], lineType)
-        image_with_text = cv2.putText(image_with_text,'Froth brightness: %.3f' % brightness,  (0, 750), font, fontScale, [255,255,255], lineType)
-        image_with_text = cv2.putText(image_with_text,'Near exit rate: %.3f' % near_exit,  (400, 630), font, fontScale, [255,255,255], lineType)
-        image_with_text = cv2.putText(image_with_text,'Uniformness: %.3f' % uniformness,  (400, 670), font, fontScale, [255,255,255], lineType)
-        image_with_text = cv2.putText(image_with_text,'Mean roundness: %.3f' % mean_roundness,  (400, 710), font, fontScale, [255,255,255], lineType)
-        image_with_text = cv2.putText(image_with_text,'Large bubble frac: %.3f' % large_frac,  (400, 750), font, fontScale, [255,255,255], lineType)
-        # images_to_glue2.append(image_with_padding)
+        image_with_text = cv2.putText(image_with_text,'Froth brightness: %s' % brightness,  (0, 750), font, fontScale, [255,255,255], lineType)
+        image_with_text = cv2.putText(image_with_text,'Near exit rate: %s' % near_exit,  (400, 630), font, fontScale, [255,255,255], lineType)
+        image_with_text = cv2.putText(image_with_text,'Uniformness: %s' % uniformness,  (400, 670), font, fontScale, [255,255,255], lineType)
+        image_with_text = cv2.putText(image_with_text,'Mean roundness: %s' % mean_roundness,  (400, 710), font, fontScale, [255,255,255], lineType)
+        image_with_text = cv2.putText(image_with_text,'Large bubble frac: %s' % large_frac,  (400, 750), font, fontScale, [255,255,255], lineType)
         return image_with_padding
+
 
 
 
