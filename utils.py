@@ -57,21 +57,22 @@ def emulate_stream(path, output_path, processor=None, max_frames=-1):
                 break
         ret, frame = cap.read()
         current_frame += 1
-        if out is None:
-            shape = frame.shape
-            out = cv2.VideoWriter(output_path, cv2.VideoWriter_fourcc(*'mp4v'), 5.0, frame.shape[:2])
-        
+
         # if frame is read correctly ret is True
         if not ret:
             logging.info("Can't receive frame (stream end?). Exiting ...")
             break
         # Our operations on the frame come here
         # frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        # print("before", frame.shape)
         if processor is not None:
             frame = processor(frame)
-        if out is not None:
+        # print("after", frame.shape)
+        if out is None:
+            h, w = frame.shape[:2]
+            out = cv2.VideoWriter(output_path, cv2.VideoWriter_fourcc(*'mp4v'), 5.0, (w, h))
 
-            out.write(frame)
+        out.write(frame)
 
     cap.release()
     if out is not None:

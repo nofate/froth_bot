@@ -174,7 +174,6 @@ class ImageProcessor:
 
     def __call__(self, frame):
         processed_frame = self.fe.compute_features(frame)
-        print(frame.shape, processed_frame.shape)
         return processed_frame
         if self.prev_frame is not None:
             pass
