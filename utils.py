@@ -46,8 +46,9 @@ def emulate_stream(path, output_path, processor=None, max_frames=-1):
     if not cap.isOpened():
         raise StopIteration
 
-    out = cv2.VideoWriter(output_path, cv2.VideoWriter_fourcc(*'mp4v'), 5.0, (800, 600))
+    # out = cv2.VideoWriter(output_path, cv2.VideoWriter_fourcc(*'mp4v'), 5.0, (800, 600))
     current_frame=0
+    out = None
 
     while cap.isOpened():
         # Capture frame-by-frame
@@ -56,6 +57,9 @@ def emulate_stream(path, output_path, processor=None, max_frames=-1):
                 break
         ret, frame = cap.read()
         current_frame += 1
+        if out is None:
+            shape = frame.shape
+            out = cv2.VideoWriter(output_path, cv2.VideoWriter_fourcc(*'mp4v'), 5.0, frame.shape[:2])
         
         # if frame is read correctly ret is True
         if not ret:
@@ -65,10 +69,12 @@ def emulate_stream(path, output_path, processor=None, max_frames=-1):
         # frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         if processor is not None:
             frame = processor(frame)
+        if out is not None:
 
-        out.write(frame)
+            out.write(frame)
 
     cap.release()
-    out.release()
+    if out is not None:
+        out.release()
 
 

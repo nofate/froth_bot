@@ -153,7 +153,7 @@ class FeaturesExtractor:
             large_frac = "-"
         fontScale = 1
         lineType = 2
-        image_with_padding = cv2.copyMakeBorder(image_with_matches,0,180,0,0,cv2.BORDER_CONSTANT,value=[0,0,0])
+        image_with_padding = cv2.copyMakeBorder(image_with_matches, 0,180,0,0,cv2.BORDER_CONSTANT,value=[0,0,0])
         image_with_text = cv2.putText(image_with_padding,'Froth number:   %d' % len(ellipses),  (0, 630), font, fontScale, [255,255,255], lineType)
         image_with_text = cv2.putText(image_with_text,'Mean froth diam: %d' % int(mean_diam),  (0, 670), font, fontScale, [255,255,255], lineType)
         image_with_text = cv2.putText(image_with_text,'Froth color: ' + str(color_name),  (0, 710), font, fontScale, [255,255,255], lineType)
@@ -174,6 +174,7 @@ class ImageProcessor:
 
     def __call__(self, frame):
         processed_frame = self.fe.compute_features(frame)
+        print(frame.shape, processed_frame.shape)
         return processed_frame
         if self.prev_frame is not None:
             pass
