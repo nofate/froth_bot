@@ -5,6 +5,8 @@ from telegram.ext import Updater
 from telegram.ext import CommandHandler, CallbackQueryHandler
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 import utils
+import processors
+import speed
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 
@@ -31,8 +33,18 @@ def watch_froth(update, context):
         "stream3" : "F2_2_3_2.ts"
     }
     source_file = files[stream_name]
-    processor = None
-    utils.emulate_stream(f"{video_dir}/{source_file}", f"{video_dir}/{stream_name}.mp4", processor)
+
+    context.bot.send_message(chat_id=update.effective_chat.id, text="Готовлю видео...")
+
+    processor = processors.ImageProcessor(processor=speed.SpeedExtractor())
+    utils.emulate_stream(f"{video_dir}/{source_file}", f"{video_dir}/{stream_name}.mp4", processor, 10)
+    f = open(f"{video_dir}/{stream_name}.mp4", 'rb')
+    context.bot.send_video(chat_id=update.effective_chat.id, supports_streaming=True, video=f)
+
+    context.bot.send_message(chat_id=update.effective_chat.id, text="Это еще не все...")
+
+    processor = processors.ImageProcessor()
+    utils.emulate_stream(f"{video_dir}/{source_file}", f"{video_dir}/{stream_name}.mp4", processor, 10)
     f = open(f"{video_dir}/{stream_name}.mp4", 'rb')
     context.bot.send_video(chat_id=update.effective_chat.id, supports_streaming=True, video=f)
 
