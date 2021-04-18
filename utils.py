@@ -40,7 +40,7 @@ def draw_flux(i):
     plt.axis("off")
 
 
-def emulate_stream(path, output_path, processor=None, max_frames=-1):
+def emulate_stream(path, output_path, processor=None, max_frames=-1, verbose=False):
     """reads the file if it were infinite"""
     cap = cv2.VideoCapture(path)
     if not cap.isOpened():
@@ -51,6 +51,8 @@ def emulate_stream(path, output_path, processor=None, max_frames=-1):
     out = None
 
     while cap.isOpened():
+        if verbose:
+            print("frame:",current_frame)
         # Capture frame-by-frame
         if max_frames > 0:
             if current_frame >= max_frames:

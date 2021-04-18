@@ -2,13 +2,17 @@ import cv2
 import numpy as np
 import math
 import webcolors
+import traceback
+import sys
+from sklearn.metrics import mean_squared_error
 
 
 def rotate_image(image, angle):
-  image_center = tuple(np.array(image.shape[1::-1]) / 2)
-  rot_mat = cv2.getRotationMatrix2D(image_center, angle, 1.0)
-  result = cv2.warpAffine(image, rot_mat, image.shape[1::-1], flags=cv2.INTER_LINEAR)
-  return result
+    # print("rotate", image.shape)
+    image_center = tuple(np.array(image.shape[1::-1]) / 2)
+    rot_mat = cv2.getRotationMatrix2D(image_center, angle, 1.0)
+    result = cv2.warpAffine(image, rot_mat, image.shape[1::-1], flags=cv2.INTER_LINEAR)
+    return result
 
 
 def longest_subsequence(sequence):
@@ -58,16 +62,18 @@ def hex2name(c):
 
 
 
-def get_image_with_matches2(my_image, small_images):
+def get_image_with_matches2(my_image, small_images, centroids):
     new_gray = my_image.copy()
     scale = 1
     delta = 0
     ddepth = cv2.CV_16S
     ellipses = []
-    for i in range(len(small_images)):#range(150, 151):#range(len(small_images)):#range(148, 150):#range(len(small_images)):
+    for i, small_image in enumerate(small_images):#range(150, 151):#range(len(small_images)):#range(148, 150):#range(len(small_images)):
         #print(i)
         try:
-            small_image = small_images[i]
+            # small_image = small_images[i]
+            if np.min(small_image.shape) < 1:
+                continue
             sobel_image = cv2.cvtColor(small_image, cv2.COLOR_BGR2GRAY)
             points = []
             max_angle = 0
@@ -75,11 +81,15 @@ def get_image_with_matches2(my_image, small_images):
             max_size2 = 0
 
             for j in range(0,13):
+                # print(sobel_image.shape, "sobel")
                 rotated_image = rotate_image(sobel_image, 15*j)
+                # print("small", small_image.shape)
                 rotated_small_image = rotate_image(small_image, 15*j)
 
                 grad_x = cv2.Sobel(rotated_image, ddepth, 1, 0, ksize=7, scale=scale, delta=delta, borderType=cv2.BORDER_DEFAULT)
                 grad_y = cv2.Sobel(rotated_image, ddepth, 0, 1, ksize=7, scale=scale, delta=delta, borderType=cv2.BORDER_DEFAULT)
+                if grad_x is None or grad_y is None:
+                    print("grad_x, grad_y")
                 size = np.min(longest_subsequence(grad_x[grad_x.shape[0]//2]))
                 size2 = np.min(longest_subsequence(grad_y.T[grad_y.shape[1]//2]))
                 #print((15*j, size, size2))
@@ -107,8 +117,9 @@ def get_image_with_matches2(my_image, small_images):
             #plt.show()
             #print(size)
             #print(size2)
-        except Exception as e:
-            print(e, flush=True)
+        except Exception:
+            traceback.print_exc(file=sys.stdout)
+            exit(1)
             continue
     return new_gray, ellipses
 
@@ -138,7 +149,7 @@ class FeaturesExtractor:
                                            max(0,int(centroids[i, 0] - bound_size*max_bound)) : 
                                            int(centroids[i, 0] + bound_size*max_bound)])
         # print(len(small_images))
-        image_with_matches, ellipses = get_image_with_matches2(image, small_images)
+        image_with_matches, ellipses = get_image_with_matches2(image, small_images, centroids)
         ellipses_np = np.array(ellipses)
         # print(ellipses_np)
         if len(ellipses_np) == 0:
