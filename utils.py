@@ -40,23 +40,29 @@ def draw_flux(i):
     plt.axis("off")
 
 
-def emulate_stream(path, output_path, processor=None):
+def emulate_stream(path, output_path, processor=None, max_frames=-1):
     """reads the file if it were infinite"""
     cap = cv2.VideoCapture(path)
     if not cap.isOpened():
         raise StopIteration
 
     out = cv2.VideoWriter(output_path, cv2.VideoWriter_fourcc(*'mp4v'), 5.0, (800, 600))
+    current_frame=0
 
     while cap.isOpened():
         # Capture frame-by-frame
+        if max_frames > 0:
+            if current_frame >= max_frames:
+                break
         ret, frame = cap.read()
+        current_frame += 1
+        
         # if frame is read correctly ret is True
         if not ret:
             logging.info("Can't receive frame (stream end?). Exiting ...")
             break
         # Our operations on the frame come here
-        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        # frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         if processor is not None:
             frame = processor(frame)
 
