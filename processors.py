@@ -205,20 +205,20 @@ class FeaturesExtractor:
 
 
 class ImageProcessor:
-    def __init__(self):
+    def __init__(self, processor=FeaturesExtractor()):
         self.prev_frame = None
-        self.fe = FeaturesExtractor()
+        self.fe = processor  #FeaturesExtractor()
 
     def __call__(self, frame):
         processed_frame = self.fe.compute_features(frame)
+        
         return processed_frame
-        if self.prev_frame is not None:
-            pass
 
 
 
 if __name__ == "__main__":
-    processor = ImageProcessor()
+    from speed import SpeedExtractor
+    processor = ImageProcessor(processor=SpeedExtractor())
     filename = "video/F1_1_1_1.ts"
     from utils import emulate_stream
     emulate_stream(filename, "bubbles.mp4", processor=processor, max_frames=30)
