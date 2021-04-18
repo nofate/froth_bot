@@ -27,6 +27,8 @@ Please scroll the page down if you don't understand Russian and yet want to know
 
 ![dynamic-features](https://github.com/nofate/froth_bot/blob/master/assets/bubbles2.gif)
 
+Цветными линиями показаны смещения сопоставленных пар особых точек SIFT, цвет линии зависит от направления, в котором движется пузырь (в качестве направлений брали движение под разными углами с шагом 45 градусов).
+
 # Where am I? What is this?
 
 TBA
