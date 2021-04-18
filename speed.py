@@ -2,6 +2,9 @@ import cv2
 import numpy as np
 import os
 import logging
+from crayons import crayons
+from sklearn.cluster import MeanShift
+from sklearn.neighbors import NearestNeighbors
 
 
 def get_point_pairs(old_frame, new_frame, cutoff=0.8):
@@ -15,8 +18,7 @@ def get_point_pairs(old_frame, new_frame, cutoff=0.8):
         return ([], [])
     pos0 = np.stack([np.asarray(k.pt) for k in kp0])
     pos1 = np.stack([np.asarray(k.pt) for k in kp1])
-    
-    from sklearn.neighbors import NearestNeighbors
+
 
     point_knn = NearestNeighbors(n_neighbors=4)
     point_knn.fit(pos0)
@@ -40,23 +42,61 @@ def get_point_pairs(old_frame, new_frame, cutoff=0.8):
 class SpeedExtractor:
     def __init__(self):
         self.prev_frame = None
+        self.cluster_shifts = True
+        
+        clust_colors = [
+            (color, tuple(int(code.strip("#")[i:i+2], 16) for i in (0, 2, 4)))
+            for color, code in crayons.items()
+            if color.lower().find("gray") < 0
+        ]
+        clust_colors = [
+            (name, (b, g, r))
+            for name, (r, g, b) in clust_colors
+            if np.abs(r - g) > 10 or np.abs(r - b) > 10 or np.abs(g - b) > 10
+        ]
+        # self.clust_colors = [
+        #     (name, (b, g, r))
+        #     for name, (b, g, r) in clust_colors
+        #     if np.min([b, g, r]) < 160 and np.max([b, g, r]) > 30
+        # ]
+        self.clust_colors = clust_colors
+        self.direction_coords = np.asarray(
+            [[np.cos(d), np.sin(d)]
+            for d in range(0, 360, 45)]
+        )
+        self.point_knn = NearestNeighbors(n_neighbors=1)
+        self.point_knn.fit(self.direction_coords)
 
     def draw_lines(self, image, old_p, new_p):
         img = image.copy()
         if len(old_p) == 0:
             return img
-        shifts = np.sqrt(((new_p - old_p)**2).sum(1))
+        shift_coords = new_p - old_p
+        shifts = np.sqrt((shift_coords**2).sum(1, keepdims=True))
+        normalized_speeds = shift_coords/(shifts + 1e-3)
+
+        if self.cluster_shifts:
+            color_clusters = self.point_knn.kneighbors(normalized_speeds, return_distance=False)
+            color_clusters = color_clusters.flatten()
+        else:
+            color_clusters = np.zeros(old_p.shape[:1])
         mean, std = shifts.mean(), shifts.std()
-        ids = shifts < mean + 3*std
+        ids = shifts.flatten() < mean + 3*std
         old_p = old_p[ids]
         new_p = new_p[ids]
-        for o, n in zip(old_p, new_p):
+        for o, n, color_no in zip(old_p, new_p, color_clusters):
             x0, y0 = o
             x1, y1 = n
             sx = int(x1 + (x1 - x0))
             sy = int(y1 + (y1 - y0))
-            img = cv2.line(img, (int(x1), int(y1)), (sx, sy), (0, 0, 255), 1)
-            img = cv2.line(img, (sx-2, sy-2), (sx-1, sy-1), (0, 0, 255), 2)
+            if self.cluster_shifts:
+                
+                name, color = self.clust_colors[color_no % len(self.clust_colors)]
+                #print(name, color)
+            else:
+                color = (0, 0, 255)
+            img = cv2.line(img, (int(x1), int(y1)), (sx, sy), color, 2)
+            img = cv2.line(img, (sx-2, sy-2), (sx-1, sy-1), color, 3)
             # print(x1, y1, sx, sy)
         return img
         pass
@@ -107,4 +147,4 @@ if __name__=="__main__":
     processor = ImageDynamicProcessor()
     filename = "video/F1_1_1_1.ts"
     from utils import emulate_stream
-    emulate_stream(filename, "bubbles_.mp4", processor=processor, max_frames=15)
+    emulate_stream(filename, "bubbles_.mp4", processor=processor, max_frames=5)

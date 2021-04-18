@@ -215,7 +215,6 @@ class ImageProcessor:
         return processed_frame
 
 
-
 if __name__ == "__main__":
     from speed import SpeedExtractor
     processor = ImageProcessor(processor=SpeedExtractor())

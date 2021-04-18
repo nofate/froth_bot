@@ -4,6 +4,7 @@ import cv2
 import logging
 import os
 
+
 class IterReaderIO(BufferedIOBase):
     def __init__(self, iterable=None):
         iterable = iterable or []
@@ -74,7 +75,11 @@ def emulate_stream(path, output_path, processor=None, max_frames=-1, verbose=Fal
         # print("after", frame.shape)
         if out is None:
             h, w = frame.shape[:2]
-            out = cv2.VideoWriter(output_path, cv2.VideoWriter_fourcc(*'mp4v'), 5.0, (w, h))
+            if os.path.splitext(output_path)[-1] == ".avi":
+                fourcc = cv2.VideoWriter_fourcc(*'XVID')
+            else:
+                fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+            out = cv2.VideoWriter(output_path, fourcc, 5.0, (w, h))
 
         out.write(frame)
 
