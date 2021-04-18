@@ -2,7 +2,7 @@ Please scroll the page down if you don't understand Russian and yet want to know
 
 # Куда я попал?
 
-В этом репозитории лежит код решения задачи с хакатона Норникеля (трек "Пенная вечеринка"), команда "Свидетели редких природных явлений".
+В этом репозитории лежит код решения задачи с [хакатона Норникеля](nnhackathon.ru) (трек "Пенная вечеринка"), команда "Свидетели редких природных явлений".
 
 ## Вход
 56 коротких видео с металлургического производства, с этапа [флотации](https://ru.wikipedia.org/wiki/%D0%A4%D0%BB%D0%BE%D1%82%D0%B0%D1%86%D0%B8%D1%8F).
@@ -29,13 +29,18 @@ Please scroll the page down if you don't understand Russian and yet want to know
 
 Цветными линиями показаны смещения сопоставленных пар особых точек SIFT, цвет линии зависит от направления, в котором движется пузырь (в качестве направлений брали движение под разными углами с шагом 45 градусов).
 
+
 # Where am I? What is this?
 
-TBA
+Here you can find our team solution for [Nornickel's hackathon](nnhackathon.ru) 2nd task. The goal was to augment froth flotation process, to make it more controllable.
 
 ## Input
 
+As an input we had 56 1-minute recordings with floth floatation. No annotation was provided.
+
 ## Output
+
+We used bunch of classical CV methods: from constant thresholding to SIFT descriptors, from `import cv2` to home-made algorithms to suppress false-positives.
 
 ### Static
 
