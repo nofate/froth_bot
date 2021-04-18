@@ -69,6 +69,8 @@ def emulate_stream(path, output_path, processor=None, max_frames=-1, verbose=Fal
         # print("before", frame.shape)
         if processor is not None:
             frame = processor(frame)
+            if frame is None:
+                continue
         # print("after", frame.shape)
         if out is None:
             h, w = frame.shape[:2]
