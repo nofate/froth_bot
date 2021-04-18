@@ -11,6 +11,31 @@ def rotate_image(image, angle):
   return result
 
 
+def longest_subsequence(sequence):
+    max_neg = 0
+    max_pos = 0
+    curr_neg = 0
+    curr_pos = 0
+    #print(sequence)
+    for i in range(len(sequence)):
+        if sequence[i] < 0:
+            curr_neg += 1
+            if curr_neg > max_neg:
+                max_neg = curr_neg
+            curr_pos = 0
+        elif sequence[i] > 0:
+            curr_pos += 1
+            if curr_pos > max_pos:
+                max_pos = curr_pos
+            curr_neg = 0
+        else:
+            curr_pos += 1
+            if curr_pos > max_pos:
+                max_pos = curr_pos
+            curr_neg = 0
+            
+    return max_neg, max_pos
+
 def rgb2hex(c):
     return "#{:02x}{:02x}{:02x}".format(int(c[0]), int(c[1]), int(c[2]))  # format(int(c[0]), int(c[1]), int(c[2]))
 
@@ -82,7 +107,8 @@ def get_image_with_matches2(my_image, small_images):
             #plt.show()
             #print(size)
             #print(size2)
-        except:
+        except Exception as e:
+            print(e, flush=True)
             continue
     return new_gray, ellipses
 
