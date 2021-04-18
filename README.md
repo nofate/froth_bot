@@ -12,7 +12,11 @@ Please scroll the page down if you don't understand Russian and yet want to know
 ### Статика: пузыри и их характеристики
 
 С помощью бинаризации мы нашли блики, затем аппроксимировали пузыри эллипсами и придумали, как считать ряд величин, характеризующих состояние пузырьковой смеси в бочке в конкретный момент.
-Как выглядит результат работы алгоритма:
+
+Вот как выглядит результат работы алгоритма:
+
+![static-features](https://github.com/nofate/froth_bot/tree/master/assets/bubbles1.gif)
+
 
 ### Динамика: движение
 
@@ -20,7 +24,7 @@ Please scroll the page down if you don't understand Russian and yet want to know
 Еще мы научились определять, в каком направлении движется поток пузырей.
 
 Результат работы этой части алгоритма можно посмотреть ниже:
-
+![dynamic-features](https://github.com/nofate/froth_bot/tree/master/assets/bubbles2.gif)
 
 # Where am I? What is this?
 
