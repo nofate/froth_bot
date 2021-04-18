@@ -1,3 +1,4 @@
 video/
 .idea/
 __pycache__/
+*.mp4
