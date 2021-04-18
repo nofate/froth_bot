@@ -1,5 +1,5 @@
 python_telegram_bot==13.4.1
 ffmpeg==1.4
 webcolors
-python-opencv
-python-opencv-contrib
+opencv-contrib-python==3.4.2.16
+opencv-python==3.4.2.16
